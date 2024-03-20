@@ -4,9 +4,8 @@ import discord
 from discord.ext import commands
 
 config = {
-    'token':
-    'MTIwNzA0NTM2MzUyNjEzOTk3NA.GY4sJb.AEmxTTAQJaZiIO4orPpKi-hTWRpuX69q-u5dEI',
-    'id': '1207045363526139974',
+    'token':'~',
+    'id': '~',
     'prefix': '!'
 }
 notification_message_id = None
@@ -30,7 +29,7 @@ async def say(ctx, *, say: str):
   await ctx.message.delete()
   permissions = True
   if permissions == True:
-    required_roles = ["СОЗДАТЕЛЬ", "Helper"]
+    required_roles = ["role", "role"]
     if any(role.name in required_roles for role in ctx.author.roles):
       await ctx.send(say)
     else:
@@ -50,7 +49,7 @@ async def on_message(say):
 
 @bot.command(name='mute')
 @commands.has_permissions(manage_roles=True)
-@commands.has_any_role('СОЗДАТЕЛЬ', 'Helper')
+@commands.has_any_role('role', 'role')
 async def mute(ctx, member: discord.Member, *, reason=None):
   reason = reason or "не указана"
   mute_role = discord.utils.get(ctx.guild.roles, name="мут")
@@ -74,7 +73,7 @@ async def on_message(message):
 
 @bot.command(name='unmute')
 @commands.has_permissions(manage_roles=True)
-@commands.has_any_role('СОЗДАТЕЛЬ', 'Helper')
+@commands.has_any_role('role', 'role')
 async def unmute(ctx, member: discord.Member):
   mute_role = discord.utils.get(ctx.guild.roles, name="мут")
   if mute_role in member.roles:
@@ -92,7 +91,7 @@ async def on_message_unmute(unmute):
 
 
 @bot.command(name='help')
-@commands.has_any_role('СОЗДАТЕЛЬ', 'Helper')
+@commands.has_any_role('role', 'role')
 async def custom_help_mod(ctx):
   embed = discord.Embed(title=f'Привет {ctx.author.mention}!',
                         color=discord.Color.green())
@@ -111,7 +110,7 @@ async def custom_help_mod(ctx):
 @bot.event
 async def on_member_join(member):
   try:
-    channel = bot.get_channel(1217918087249002516)
+    channel = bot.get_channel(id_channel)
     if channel:
       await channel.send(f"К нам присоединился {member.mention}!")
   except Exception as e:
@@ -120,7 +119,7 @@ async def on_member_join(member):
   
 
 @bot.command(name='notif')
-@commands.has_any_role('СОЗДАТЕЛЬ', 'Helper')
+@commands.has_any_role('role', 'role')
 async def notif(ctx):
     global notification_message_id
     embed_message = discord.Embed(title='Роль за реакцию', color=discord.Color.green())
@@ -141,9 +140,9 @@ async def on_raw_reaction_add(payload):
         member = guild.get_member(payload.user_id)
 
         if payload.emoji.name == '🎮':
-            role = discord.utils.get(guild.roles, name="Уведом. по играм")
+            role = discord.utils.get(guild.roles, name="role")
         elif payload.emoji.name == '🔔':
-            role = discord.utils.get(guild.roles, name="Уведом. по серверу")
+            role = discord.utils.get(guild.roles, name="role")
         else:
             role = None
 
@@ -158,9 +157,9 @@ async def on_raw_reaction_remove(payload):
         member = guild.get_member(payload.user_id)
 
         if payload.emoji.name == '🎮':
-            role = discord.utils.get(guild.roles, name="Уведом. по играм")
+            role = discord.utils.get(guild.roles, name="role")
         elif payload.emoji.name == '🔔':
-            role = discord.utils.get(guild.roles, name="Уведом. по серверу")
+            role = discord.utils.get(guild.roles, name="role")
         else:
             role = None
 
@@ -169,7 +168,7 @@ async def on_raw_reaction_remove(payload):
 
 
 @bot.command(name='clear')
-@commands.has_any_role('СОЗДАТЕЛЬ', 'Helper')
+@commands.has_any_role('role', 'role')
 @commands.has_permissions(manage_messages=True)
 async def delete(ctx, amount: int):
     await ctx.channel.purge(limit=amount + 1)
