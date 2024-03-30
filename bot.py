@@ -29,7 +29,7 @@ async def say(ctx, *, say: str):
   await ctx.message.delete()
   permissions = True
   if permissions == True:
-    required_roles = ["role", "role"]
+    required_roles = ["СОЗДАТЕЛЬ", "Helper"]
     if any(role.name in required_roles for role in ctx.author.roles):
       await ctx.send(say)
     else:
@@ -49,7 +49,7 @@ async def on_message(say):
 
 @bot.command(name='mute')
 @commands.has_permissions(manage_roles=True)
-@commands.has_any_role('role', 'role')
+@commands.has_any_role('СОЗДАТЕЛЬ', 'Helper')
 async def mute(ctx, member: discord.Member, *, reason=None):
   reason = reason or "не указана"
   mute_role = discord.utils.get(ctx.guild.roles, name="мут")
@@ -73,7 +73,7 @@ async def on_message(message):
 
 @bot.command(name='unmute')
 @commands.has_permissions(manage_roles=True)
-@commands.has_any_role('role', 'role')
+@commands.has_any_role('СОЗДАТЕЛЬ', 'Helper')
 async def unmute(ctx, member: discord.Member):
   mute_role = discord.utils.get(ctx.guild.roles, name="мут")
   if mute_role in member.roles:
@@ -91,7 +91,7 @@ async def on_message_unmute(unmute):
 
 
 @bot.command(name='help')
-@commands.has_any_role('role', 'role')
+@commands.has_any_role('СОЗДАТЕЛЬ', 'Helper')
 async def custom_help_mod(ctx):
   embed = discord.Embed(title=f'Привет {ctx.author.mention}!',
                         color=discord.Color.green())
@@ -101,7 +101,7 @@ async def custom_help_mod(ctx):
                    '!mute @user - замьютить пользователя\n' \
                    '!say - сказать от имени бота (иногда разрешено только для '
                    'административным ролей)\n' \
-                   '!notif - уведомления по реакциям\n' \
+                   '!notif - уведомления по играм\n' \
                    '!clear число - очистить число сообщений', inline=False)
   await ctx.channel.send(embed=embed)
 
@@ -110,7 +110,7 @@ async def custom_help_mod(ctx):
 @bot.event
 async def on_member_join(member):
   try:
-    channel = bot.get_channel(id_channel)
+    channel = bot.get_channel(1217918087249002516)
     if channel:
       await channel.send(f"К нам присоединился {member.mention}!")
   except Exception as e:
@@ -119,56 +119,21 @@ async def on_member_join(member):
   
 
 @bot.command(name='notif')
-@commands.has_any_role('role', 'role')
+@commands.has_any_role('СОЗДАТЕЛЬ', 'Helper')
 async def notif(ctx):
-    global notification_message_id
-    embed_message = discord.Embed(title='Роль за реакцию', color=discord.Color.green())
-    embed_message.add_field(name='Поставьте реакцию чтобы получать сообщения с уведомлениями:', value='🎮 - Получать уведомления по поводу игр.\n🔔 - Получать уведомления по поводу сервера.', inline=False)
-    reaction_emoji1 = '🎮'
-    reaction_emoji2 = '🔔'
-    await ctx.channel.send("@everyone")
-    message = await ctx.channel.send(embed=embed_message)
-    await ctx.message.delete()
-    await message.add_reaction(reaction_emoji1)
-    await message.add_reaction(reaction_emoji2)
-    notification_message_id = message.id
-@bot.event
-async def on_raw_reaction_add(payload):
-    global notification_message_id
-    if notification_message_id is not None and payload.message_id == notification_message_id:
-        guild = bot.get_guild(payload.guild_id)
-        member = guild.get_member(payload.user_id)
-
-        if payload.emoji.name == '🎮':
-            role = discord.utils.get(guild.roles, name="role")
-        elif payload.emoji.name == '🔔':
-            role = discord.utils.get(guild.roles, name="role")
-        else:
-            role = None
-
-        if role:
-            await member.add_roles(role)
-
-@bot.event
-async def on_raw_reaction_remove(payload):
-    global notification_message_id
-    if notification_message_id is not None and payload.message_id == notification_message_id:
-        guild = bot.get_guild(payload.guild_id)
-        member = guild.get_member(payload.user_id)
-
-        if payload.emoji.name == '🎮':
-            role = discord.utils.get(guild.roles, name="role")
-        elif payload.emoji.name == '🔔':
-            role = discord.utils.get(guild.roles, name="role")
-        else:
-            role = None
-
-        if role and member:
-            await member.remove_roles(role) 
+    notif_role = discord.utils.get(ctx.guild.roles, name="Уведомления")
+    if not notif_role:
+        notif_role = await ctx.guild.create_role(name="Уведомления")
+    
+    if notif_role not in ctx.author.roles:
+      await ctx.author.add_roles(notif_role)
+      await ctx.send(f'{ctx.author.mention} вы получили роль {notif_role.mention} и теперь вы будете получать уведомления по поводу игровых событий.')
+    else:
+      await ctx.send(f'{ctx.author.mention} вы сняли с себя роль {notif_role.mention} и теперь вы не будете получать уведомления по поводу игровых событий.')
 
 
 @bot.command(name='clear')
-@commands.has_any_role('role', 'role')
+@commands.has_any_role('СОЗДАТЕЛЬ', 'Helper')
 @commands.has_permissions(manage_messages=True)
 async def delete(ctx, amount: int):
     await ctx.channel.purge(limit=amount + 1)
